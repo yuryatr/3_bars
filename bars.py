@@ -32,12 +32,11 @@ def get_smallest_bar(list_of_bars):
             seeking_bar = bar
     return seeking_bar
 
-def get_closest_bar(list_of_bars, longitude, latitude, number_of_returned_bars=1):
+def get_closest_bar(list_of_bars, longitude, latitude):
     """
         @param list_of_bars Список дынных
         @param longitude Долгота
         @param latitude Широта
-        @param number_of_returned_bars Количество возвращаемых ближайших баров
         @return Список ближайших баров
     """
     if not list_of_bars:
@@ -50,38 +49,11 @@ def get_closest_bar(list_of_bars, longitude, latitude, number_of_returned_bars=1
         list_of_bars[index]['Distance'] = round(distance, 15)
 
     list_of_bars.sort(key=lambda x: x['Distance'])
+    closest_bar = list_of_bars[0]
 
-    if number_of_returned_bars >= len(list_of_bars):
-        return list_of_bars
+    return closest_bar
 
-    return list_of_bars[:number_of_returned_bars]
-
-def get_data_from_the_user():
-
-    print('Введите путь к файлу московских баров (в формате json): ')
-    while True:
-        try:
-            path_to_file = input('> ')
-            list_of_bars = load_data(path_to_file)
-            break
-        except IOError:
-            print('Введите корректный путь до файла.')
-
-    print('Введите gps-координаты (долгота, широта) через запятую '
-          '(Пример: "х.ххххххххххххххх, х.ххххххххххххххх"):')
-
-    while True:
-        try:
-            gps_coordinates = input('> ')
-            longitude, latitude = map(float, gps_coordinates.split(','))
-            break
-        except ValueError as e:
-            print('Ошибка: не верно введены gps-координаты! '
-                  'Введите число. Пример: "х.ххххххххххххххх, х.ххххххххххххххх"')
-
-    return list_of_bars, longitude, latitude
-
-def display_results_on_screen(biggest_bar, smallest_bar, closest_bars):
+def display_results_on_screen(biggest_bar, smallest_bar, closest_bar):
     
     print('\n# Самый вместительный бар: \n> {}. {};'.format(
         biggest_bar['Cells']['Name'],
@@ -91,23 +63,39 @@ def display_results_on_screen(biggest_bar, smallest_bar, closest_bars):
         smallest_bar['Cells']['Name'],
         smallest_bar['Cells']['Address']))
 
-    print('\n# Ближайшие {} бара:'.format(len(closest_bars)))
-    for i, closest_bar in enumerate(closest_bars):
-        print('> {}) {}. {};'.format(i+1,
-            closest_bar['Cells']['Name'],
-            closest_bar['Cells']['Address']))
-
+    print('\n# Ближайший бар: \n> {}. {};'.format(
+        closest_bar['Cells']['Name'],
+        closest_bar['Cells']['Address']))
 
 
 if __name__ == '__main__':
     try:
-        list_of_bars, longitude, latitude = get_data_from_the_user()
+        
+        print('Введите путь к файлу московских баров (в формате json): ')
+        while True:
+            try:
+                path_to_file = input('> ')
+                list_of_bars = load_data(path_to_file)
+                break
+            except IOError:
+                print('Введите корректный путь до файла.')
 
-        biggest_bar = get_biggest_bar(list_of_bars)
-        smallest_bar = get_smallest_bar(list_of_bars)
-        closest_bars = get_closest_bar(list_of_bars, longitude, latitude, number_of_returned_bars=3)
+        
+        print('Введите gps-координаты (долгота, широта) через запятую '
+              '(Пример: "х.ххххххххххххххх, х.ххххххххххххххх"):')
+        while True:
+            try:
+                gps_coordinates = input('> ')
+                longitude, latitude = map(float, gps_coordinates.split(','))
+                break
+            except ValueError as e:
+                print('Ошибка: не верно введены gps-координаты! '
+                      'Введите число. Пример: "х.ххххххххххххххх, х.ххххххххххххххх"')
 
-        display_results_on_screen(biggest_bar, smallest_bar, closest_bars)
+        display_results_on_screen(
+            get_biggest_bar(list_of_bars),
+            get_smallest_bar(list_of_bars),
+            get_closest_bar(list_of_bars, longitude, latitude))
 
     except KeyboardInterrupt:
         print('Принудительное завершение')
