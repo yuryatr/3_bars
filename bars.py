@@ -42,6 +42,8 @@ def get_closest_bar(list_of_bars, longitude, latitude):
     if not list_of_bars:
         return []
 
+    index_first_bar = 0
+
     for index, bar in enumerate(list_of_bars):
         longitude_bar = bar['Cells']['geoData']['coordinates'][0]
         latitude_bar = bar['Cells']['geoData']['coordinates'][1]
@@ -49,9 +51,33 @@ def get_closest_bar(list_of_bars, longitude, latitude):
         list_of_bars[index]['Distance'] = round(distance, 15)
 
     list_of_bars.sort(key=lambda x: x['Distance'])
-    closest_bar = list_of_bars[0]
 
-    return closest_bar
+    return list_of_bars[index_first_bar]
+
+def get_list_of_bars():
+    print('Введите путь к файлу московских баров (в формате json): ')
+    while True:
+        try:
+            path_to_file = input('> ')
+            list_of_bars = load_data(path_to_file)
+            break
+        except IOError:
+            print('Введите корректный путь до файла.')
+
+    return list_of_bars
+
+def def_gps_coordinates():
+    print('Введите gps-координаты (долгота, широта) через запятую '
+          '(Пример: "х.ххххххххххххххх, х.ххххххххххххххх"):')
+    while True:
+        try:
+            gps_coordinates = input('> ')
+            longitude, latitude = map(float, gps_coordinates.split(','))
+            break
+        except ValueError as e:
+            print('Ошибка: не верно введены gps-координаты! '
+                  'Введите число. Пример: "х.ххххххххххххххх, х.ххххххххххххххх"')
+    return longitude, latitude
 
 def display_results_on_screen(biggest_bar, smallest_bar, closest_bar):
     
@@ -68,35 +94,15 @@ def display_results_on_screen(biggest_bar, smallest_bar, closest_bar):
         closest_bar['Cells']['Address']))
 
 
+
 if __name__ == '__main__':
     try:
-        
-        print('Введите путь к файлу московских баров (в формате json): ')
-        while True:
-            try:
-                path_to_file = input('> ')
-                list_of_bars = load_data(path_to_file)
-                break
-            except IOError:
-                print('Введите корректный путь до файла.')
-
-        
-        print('Введите gps-координаты (долгота, широта) через запятую '
-              '(Пример: "х.ххххххххххххххх, х.ххххххххххххххх"):')
-        while True:
-            try:
-                gps_coordinates = input('> ')
-                longitude, latitude = map(float, gps_coordinates.split(','))
-                break
-            except ValueError as e:
-                print('Ошибка: не верно введены gps-координаты! '
-                      'Введите число. Пример: "х.ххххххххххххххх, х.ххххххххххххххх"')
-
+        list_of_bars = get_list_of_bars()
+        longitude, latitude = def_gps_coordinates()
         display_results_on_screen(
             get_biggest_bar(list_of_bars),
             get_smallest_bar(list_of_bars),
             get_closest_bar(list_of_bars, longitude, latitude))
-
     except KeyboardInterrupt:
         print('Принудительное завершение')
     finally:
