@@ -1,5 +1,5 @@
 import json
-import math
+from math import sqrt
 
 
 def load_data(filepath):
@@ -10,55 +10,38 @@ def load_data(filepath):
     with open(filepath, 'r', encoding='utf-8') as f:
         return json.load(f)
 
+def get_bar_seats_info(bar):
+    return bar['Cells']['SeatsCount']
+
+def get_bar_distance(bar, usr_longitude, usr_latitude):
+    index_bar_longitude = 0
+    index_bar_latitude = 1
+    bar_longitude = bar['Cells']['geoData']['coordinates'][index_bar_longitude]
+    bar_latitude = bar['Cells']['geoData']['coordinates'][index_bar_latitude]
+    return sqrt(pow((bar_longitude - usr_longitude), 2) + pow((bar_latitude - usr_latitude), 2))
+
 def get_biggest_bar(list_of_bars):
     """
         @param list_of_bars Список дынных баров
-        @return Данные, самый большой бар из списка
+        @return Данные бара, самый большой бар из списка
     """
-    index_first_bar = 0
-    seeking_bar = list_of_bars.pop(index_first_bar)
-    for bar in list_of_bars:
-        if bar['Cells']['SeatsCount'] > seeking_bar['Cells']['SeatsCount']:
-            seeking_bar = bar
-    return seeking_bar
+    return max(list_of_bars, key=get_bar_seats_info)
 
 def get_smallest_bar(list_of_bars):
     """
         @param list_of_bars Список дынных баров
-        @return Данные, самый маленький бар из списка
+        @return Данные бара, самый маленький бар из списка
     """
-    index_first_bar = 0
-    seeking_bar = list_of_bars.pop(index_first_bar)
-    for bar in list_of_bars:
-        if bar['Cells']['SeatsCount'] < seeking_bar['Cells']['SeatsCount']:
-            seeking_bar = bar
-    return seeking_bar
+    return min(list_of_bars, key=get_bar_seats_info)
 
-def get_closest_bar(list_of_bars, longitude, latitude):
+def get_closest_bar(list_of_bars, usr_longitude, usr_latitude):
     """
         @param list_of_bars Список дынных
-        @param longitude Долгота
-        @param latitude Широта
-        @return Список ближайших баров
+        @param usr_longitude Долгота
+        @param usr_latitude Широта
+        @return Ближайший бар
     """
-    if not list_of_bars:
-        return []
-
-    index_first_bar = 0
-    index_bar_longitude = 0
-    index_bar_latitude = 1
-    index_bar_latitude = 1
-    digits_after_the_point = 15
-
-    for index, bar in enumerate(list_of_bars):
-        longitude_bar = bar['Cells']['geoData']['coordinates'][index_bar_longitude]
-        latitude_bar = bar['Cells']['geoData']['coordinates'][index_bar_latitude]
-        distance = abs(math.sqrt((longitude - longitude_bar)**2 + (latitude - latitude_bar)**2))
-        list_of_bars[index]['Distance'] = round(distance, digits_after_the_point)
-
-    list_of_bars.sort(key=lambda x: x['Distance'])
-
-    return list_of_bars[index_first_bar]
+    return min(list_of_bars, key=lambda bar: get_bar_distance(bar, usr_longitude, usr_latitude))
 
 def get_list_of_bars():
     print('Введите путь к файлу московских баров (в формате json): ')
