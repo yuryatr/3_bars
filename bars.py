@@ -15,7 +15,8 @@ def get_biggest_bar(list_of_bars):
         @param list_of_bars Список дынных баров
         @return Данные, самый большой бар из списка
     """
-    seeking_bar = list_of_bars.pop(0)
+    index_first_bar = 0
+    seeking_bar = list_of_bars.pop(index_first_bar)
     for bar in list_of_bars:
         if bar['Cells']['SeatsCount'] > seeking_bar['Cells']['SeatsCount']:
             seeking_bar = bar
@@ -26,7 +27,8 @@ def get_smallest_bar(list_of_bars):
         @param list_of_bars Список дынных баров
         @return Данные, самый маленький бар из списка
     """
-    seeking_bar = list_of_bars.pop(0)
+    index_first_bar = 0
+    seeking_bar = list_of_bars.pop(index_first_bar)
     for bar in list_of_bars:
         if bar['Cells']['SeatsCount'] < seeking_bar['Cells']['SeatsCount']:
             seeking_bar = bar
@@ -43,12 +45,16 @@ def get_closest_bar(list_of_bars, longitude, latitude):
         return []
 
     index_first_bar = 0
+    index_bar_longitude = 0
+    index_bar_latitude = 1
+    index_bar_latitude = 1
+    digits_after_the_point = 15
 
     for index, bar in enumerate(list_of_bars):
-        longitude_bar = bar['Cells']['geoData']['coordinates'][0]
-        latitude_bar = bar['Cells']['geoData']['coordinates'][1]
+        longitude_bar = bar['Cells']['geoData']['coordinates'][index_bar_longitude]
+        latitude_bar = bar['Cells']['geoData']['coordinates'][index_bar_latitude]
         distance = abs(math.sqrt((longitude - longitude_bar)**2 + (latitude - latitude_bar)**2))
-        list_of_bars[index]['Distance'] = round(distance, 15)
+        list_of_bars[index]['Distance'] = round(distance, digits_after_the_point)
 
     list_of_bars.sort(key=lambda x: x['Distance'])
 
